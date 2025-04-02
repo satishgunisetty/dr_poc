@@ -1,10 +1,9 @@
 [tool.poetry]
 name = "databricks-project"
 version = "0.1.0"
-description = "A Python project template for Databricks"
+description = "A Python project for Databricks"
 authors = ["Your Name <your.email@example.com>"]
-readme = "README.md"
-packages = [{include = "src"}]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -14,13 +13,15 @@ pandas = "^2.0.0"
 numpy = "^1.24.0"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.0.0"
-black = "^23.0.0"
-flake8 = "^6.0.0"
-mypy = "^1.5.0"
-isort = "^5.12.0"
-pylint = "^3.0.0"
-pre-commit = "^3.3.0"
+pytest = "^8.0.0"
+pytest-cov = "^4.1.0"
+black = "^24.1.1"
+isort = "^5.13.2"
+flake8 = "^7.0.0"
+flake8-docstrings = "^1.7.0"
+mypy = "^1.8.0"
+pylint = "^3.0.3"
+pre-commit = "^3.6.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -34,6 +35,10 @@ include = '\.pyi?$'
 [tool.isort]
 profile = "black"
 multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
 line_length = 88
 
 [tool.mypy]
@@ -46,4 +51,4 @@ check_untyped_defs = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-v --cov=src --cov-report=term-missing" 
+addopts = "--cov=src --cov-report=term-missing"

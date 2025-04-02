@@ -62,4 +62,4 @@ log/
 .env.production.local
 
 # Poetry
-poetry.lock 
+poetry.lock

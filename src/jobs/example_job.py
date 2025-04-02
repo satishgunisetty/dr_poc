@@ -1,47 +1,105 @@
-"""
-Example ETL job for Databricks.
-"""
+"""Example job for demonstrating project structure and functionality."""
 
-from pyspark.sql import SparkSession
-from src.utils.spark_utils import get_spark_session, read_delta_table, write_delta_table
-from src.config.settings import *
 import logging
+from typing import Optional
+
+from pyspark.sql import DataFrame, SparkSession
+
+from src.config.settings import CONTAINER_NAME, LOG_FORMAT, LOG_LEVEL, STORAGE_ACCOUNT
 
 # Configure logging
-logging.basicConfig(
-    level=LOG_LEVEL,
-    format=LOG_FORMAT
-)
+logging.basicConfig(level=LOG_LEVEL, format=LOG_FORMAT)
 logger = logging.getLogger(__name__)
 
-def main():
-    """
-    Main function to run the ETL job.
-    """
-    try:
-        # Initialize Spark session
-        spark = get_spark_session("Example ETL Job")
-        logger.info("Spark session initialized successfully")
 
-        # Example: Read source data
-        source_df = read_delta_table(spark, f"dbfs:/{STORAGE_ACCOUNT}/{CONTAINER_NAME}/source_table")
-        logger.info(f"Read {source_df.count()} records from source table")
+class ExampleJob:
+    """Example job class for data processing."""
 
-        # Example: Transform data
-        transformed_df = source_df.filter(source_df["status"] == "active")
-        logger.info(f"Transformed data: {transformed_df.count()} records")
+    def __init__(self) -> None:
+        """Initialize the job."""
+        self.spark = (
+            SparkSession.builder.appName("Example ETL Job")
+            .config("spark.driver.memory", "2g")
+            .config("spark.executor.memory", "4g")
+            .getOrCreate()
+        )
 
-        # Example: Write transformed data
-        output_path = f"dbfs:/{STORAGE_ACCOUNT}/{CONTAINER_NAME}/output_table"
-        write_delta_table(transformed_df, output_path)
-        logger.info(f"Successfully wrote data to {output_path}")
+    def read_data(self, path: str) -> Optional[DataFrame]:
+        """Read data from Azure Data Lake Storage.
 
-    except Exception as e:
-        logger.error(f"Error in ETL job: {str(e)}")
-        raise
-    finally:
-        if 'spark' in locals():
-            spark.stop()
+        Args:
+            path: Path to the data in ADLS
+
+        Returns:
+            DataFrame containing the read data
+        """
+        try:
+            adls_path = (
+                f"abfss://{CONTAINER_NAME}@{STORAGE_ACCOUNT}"
+                f".dfs.core.windows.net/{path}"
+            )
+            return (
+                self.spark.read.format("csv")
+                .option("header", "true")
+                .option("inferSchema", "true")
+                .load(adls_path)
+            )
+        except Exception as e:
+            logger.error("Error reading data: %s", str(e))
+            return None
+
+    def write_data(self, df: DataFrame, path: str) -> None:
+        """Write data to Azure Data Lake Storage.
+
+        Args:
+            df: DataFrame to write
+            path: Target path in ADLS
+        """
+        try:
+            adls_path = (
+                f"abfss://{CONTAINER_NAME}@{STORAGE_ACCOUNT}"
+                f".dfs.core.windows.net/{path}"
+            )
+            df.write.format("csv").option("header", "true").mode("overwrite").save(
+                adls_path
+            )
+        except Exception as e:
+            logger.error("Error writing data: %s", str(e))
+            raise
+
+    def process_data(self, df: DataFrame) -> DataFrame:
+        """Process the input DataFrame.
+
+        Args:
+            df: Input DataFrame to process
+
+        Returns:
+            Processed DataFrame
+        """
+        return df.filter("id > 0")
+
+    def run(self) -> None:
+        """Run the ETL job."""
+        try:
+            # Read source data
+            source_df = self.read_data("source_table")
+            if source_df is None:
+                return
+            logger.info("Read %d records from source table", source_df.count())
+
+            # Transform data
+            transformed_df = self.process_data(source_df)
+            logger.info("Transformed %d records", transformed_df.count())
+
+            # Write transformed data
+            self.write_data(transformed_df, "output_table")
+            logger.info("Successfully wrote data to output_table")
+
+        except Exception as e:
+            logger.error("Job failed: %s", str(e))
+            raise
+
 
 if __name__ == "__main__":
-    main() 
+    job = ExampleJob()
+    job.run()

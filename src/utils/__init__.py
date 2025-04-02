@@ -1,3 +1,1 @@
-"""
-Utility functions and helpers for the Databricks project.
-""" 
+"""Utility functions package initialization."""

@@ -1,47 +1,96 @@
-"""
-Utility functions for Spark operations.
-"""
+"""Utility functions for Spark operations."""
 
-from pyspark.sql import SparkSession
-from pyspark.sql.types import *
-import logging
+from typing import Any, Dict, List, Optional
 
-def get_spark_session(app_name: str) -> SparkSession:
-    """
-    Create and return a Spark session with common configurations.
-    
+from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql.types import (
+    BooleanType,
+    DoubleType,
+    IntegerType,
+    StringType,
+    StructField,
+    StructType,
+    TimestampType,
+)
+
+
+def get_spark_session(app_name: str = "Spark Utils") -> SparkSession:
+    """Create and configure a Spark session.
+
     Args:
-        app_name (str): Name of the Spark application
-        
+        app_name: Name of the Spark application
+
     Returns:
-        SparkSession: Configured Spark session
+        Configured SparkSession instance
     """
-    return (SparkSession.builder
-            .appName(app_name)
-            .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
-            .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
-            .getOrCreate())
+    return (
+        SparkSession.builder.appName(app_name)
+        .config("spark.driver.memory", "2g")
+        .config("spark.executor.memory", "4g")
+        .getOrCreate()
+    )
 
-def read_delta_table(spark: SparkSession, table_path: str) -> DataFrame:
-    """
-    Read a Delta table from the specified path.
-    
+
+def read_data(path: str, format_type: str = "parquet") -> Optional[DataFrame]:
+    """Read data from a file.
+
     Args:
-        spark (SparkSession): Active Spark session
-        table_path (str): Path to the Delta table
-        
+        path: Path to the data file
+        format_type: File format (e.g., parquet, csv)
+
     Returns:
-        DataFrame: Spark DataFrame containing the table data
+        DataFrame containing the read data
     """
-    return spark.read.format("delta").load(table_path)
+    spark = get_spark_session()
+    try:
+        return (
+            spark.read.format(format_type)
+            .option("header", "true")
+            .option("inferSchema", "true")
+            .load(path)
+        )
+    except Exception:
+        return None
 
-def write_delta_table(df: DataFrame, table_path: str, mode: str = "overwrite") -> None:
-    """
-    Write a DataFrame to a Delta table.
-    
+
+def write_data(df: DataFrame, path: str, format_type: str = "parquet") -> None:
+    """Write data to a file.
+
     Args:
-        df (DataFrame): Spark DataFrame to write
-        table_path (str): Path where the Delta table should be written
-        mode (str): Write mode (overwrite, append, etc.)
+        df: DataFrame to write
+        path: Target path for the file
+        format_type: File format (e.g., parquet, csv)
     """
-    df.write.format("delta").mode(mode).save(table_path) 
+    df.write.format(format_type).option("header", "true").mode("overwrite").save(path)
+
+
+def read_delta_table(spark: SparkSession, path: str) -> DataFrame:
+    """Read data from a Delta table."""
+    return spark.read.format("delta").load(path)
+
+
+def write_delta_table(df: DataFrame, path: str) -> None:
+    """Write data to a Delta table."""
+    df.write.format("delta").mode("overwrite").save(path)
+
+
+def create_schema(fields: List[Dict[str, Any]]) -> StructType:
+    """Create a Spark schema from field definitions."""
+    type_mapping = {
+        "string": StringType(),
+        "integer": IntegerType(),
+        "double": DoubleType(),
+        "timestamp": TimestampType(),
+        "boolean": BooleanType(),
+    }
+
+    return StructType(
+        [
+            StructField(
+                field["name"],
+                type_mapping.get(field["type"], StringType()),
+                field.get("nullable", True),
+            )
+            for field in fields
+        ]
+    )

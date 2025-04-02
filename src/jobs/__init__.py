@@ -1,3 +1,1 @@
-"""
-Databricks jobs package containing ETL and processing jobs.
-""" 
+"""Jobs package initialization."""

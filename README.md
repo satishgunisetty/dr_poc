@@ -1,6 +1,38 @@
-# Databricks Python Project
+# Databricks Project
 
-This is a template Python project structure for running on Databricks.
+A Python project template for Databricks ETL jobs.
+
+## Features
+
+- Modern Python project structure with Poetry for dependency management
+- PySpark and Delta Lake integration
+- Comprehensive test suite with pytest and coverage reporting
+- Code quality tools (black, isort, flake8, mypy, pylint)
+- Pre-commit hooks for code quality checks
+- Docker support for containerized development and deployment
+
+## Getting Started
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/databricks-project.git
+cd databricks-project
+```
+
+2. Install dependencies using Poetry:
+```bash
+poetry install
+```
+
+3. Run the tests:
+```bash
+poetry run pytest
+```
+
+4. Run the example job:
+```bash
+poetry run python -m src.jobs.example_job
+```
 
 ## Project Structure
 
@@ -28,6 +60,27 @@ This is a template Python project structure for running on Databricks.
 └── notebooks/
     └── example.ipynb
 ```
+
+## Development
+
+1. Install pre-commit hooks:
+```bash
+poetry run pre-commit install
+```
+
+2. Run code quality checks:
+```bash
+make build-all
+```
+
+3. Build Docker image:
+```bash
+docker build -t databricks-project .
+```
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Requirements
 
@@ -174,4 +227,4 @@ This project uses several tools to maintain code quality:
 - Write tests in the tests directory
 - Follow PEP 8 style guide
 - Run pre-commit hooks before committing changes
-- Use Docker for consistent development and production environments 
+- Use Docker for consistent development and production environments

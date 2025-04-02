@@ -161,4 +161,4 @@ dev-shell: ## Start a development shell in the container
 		--name $(CONTAINER_NAME)-shell \
 		-v $(PWD):/app \
 		$(DOCKER_IMAGE) \
-		/bin/bash 
+		/bin/bash

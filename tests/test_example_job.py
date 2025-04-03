@@ -6,7 +6,7 @@ from pyspark.sql import SparkSession
 from src.jobs.example_job import ExampleJob
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")  # type: ignore[misc]
 def spark() -> SparkSession:
     """Create a Spark session for testing."""
     return (

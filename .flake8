@@ -1,13 +1,8 @@
 [flake8]
+exclude = .venv/*, .git/*
 max-line-length = 88
 extend-ignore = E203, W503, D200
 per-file-ignores =
     __init__.py: F401
     tests/*: D100,D101,D102,D103
-exclude =
-    .git,
-    __pycache__,
-    build,
-    dist,
-    *.egg-info
 max-complexity = 10

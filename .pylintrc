@@ -3,7 +3,7 @@
 ignore=CVS,*.pyc,*.pyo,*.pyd,__pycache__,*.egg-info
 
 # Add any Python module names here where you want to disable all warnings
-disable=C0111,R0903,C0103,R0913,R0914,W0511,W0105,R0801,W1508
+disable=C0111,R0903,C0103,R0913,R0914,W0511,W0105,R0801,W1508,W0718
 
 # Maximum number of characters on a single line
 max-line-length=88
@@ -47,7 +47,8 @@ disable=C0111,  # missing-docstring
         W0511,  # fixme
         W0105,  # pointless-string-statement
         R0801,  # duplicate-code
-        W1508   # invalid-envvar-default
+        W1508,  # invalid-envvar-default
+        W0718   # broad-exception-caught
 
 [REPORTS]
 # Set the output format
@@ -110,9 +111,11 @@ dummy-variables-rgx=_|dummy
 additional-builtins=
 
 [CLASSES]
-ignore-iface-methods=isImplementedBy,deferred,extends,names,namesAndDescriptions,queryDescriptionFor,getBases,getDescriptionFor,getDoc,getName,getTaggedValue,getTaggedValueTags,isEqualOrExtendedBy,setTaggedValue,isImplementedByInstancesOf,adaptWith,is_implemented_by
+# List of interface methods to ignore
+ignore-mixin-members=yes
 
 [IMPORTS]
+# Deprecated modules which should not be used
 deprecated-modules=regsub,TERMIOS,Bastion,rexec
 
 [DESIGN]
@@ -121,4 +124,5 @@ max-branches=12
 max-parents=7
 
 [EXCEPTIONS]
-overgeneral-exceptions=Exception
+# List of exceptions that do not need to be mentioned in the Raises section of a docstring
+overgeneral-exceptions=builtins.Exception

@@ -21,16 +21,14 @@ help: ## Display this help message
 
 activate: ## Activate the virtual environment
 	@echo "Activating virtual environment..."
-	@VENV_PATH=$$(poetry env info --path) && \
-	if [ -z "$$VENV_PATH" ]; then \
+	@if [ -z "$$(poetry env info --path)" ]; then \
 		echo "Creating new virtual environment..." && \
-		poetry install && \
-		VENV_PATH=$$(poetry env info --path); \
+		poetry install; \
 	fi && \
-	echo "Virtual environment path: $$VENV_PATH" && \
-	echo "To activate the virtual environment, run:" && \
-	echo "poetry env activate $$VENV_PATH" && \
-	echo "Or use: poetry run <command>"
+	echo "Virtual environment is ready. Use one of these commands:" && \
+	echo "1. poetry shell" && \
+	echo "2. poetry run <command>" && \
+	echo "3. source $$(poetry env info --path)/bin/activate"
 
 check-precommit: ## Run pre-commit hooks
 	@echo "Running pre-commit hooks..."

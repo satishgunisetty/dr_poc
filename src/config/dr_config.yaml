@@ -1,0 +1,107 @@
+# DR Configuration
+backup_location:
+  catalog: "dr_backup"
+  schema: "dr_metadata"
+
+# Storage configuration
+storage:
+  type: "abfss"  # Optional: abfss, s3, gcs, etc.
+  container: "dr-backup"  # Optional: container/bucket name
+  path_prefix: "backups"  # Optional: path prefix within container
+  use_external_location: false  # Whether to use external location for backups
+
+# Global settings
+settings:
+  verification_enabled: true
+  retention_days: 30
+  max_retries: 3
+  timeout_minutes: 60
+
+# Metadata table configuration
+metadata:
+  table: "dr_audit_log"
+  columns:
+    - name: "run_id"
+      type: "STRING"
+    - name: "timestamp"
+      type: "TIMESTAMP"
+    - name: "operation"
+      type: "STRING"
+    - name: "catalog"
+      type: "STRING"
+    - name: "schema"
+      type: "STRING"
+    - name: "table"
+      type: "STRING"
+    - name: "source_version"
+      type: "BIGINT"
+    - name: "target_version"
+      type: "BIGINT"
+    - name: "row_count"
+      type: "BIGINT"
+    - name: "status"
+      type: "STRING"
+    - name: "error_message"
+      type: "STRING"
+    - name: "duration_seconds"
+      type: "BIGINT"
+    - name: "verification_status"
+      type: "STRING"
+    - name: "verification_details"
+      type: "STRING"
+    - name: "storage_location"
+      type: "STRING"
+    # Deep Clone specific metadata
+    - name: "deep_clone_metadata"
+      type: "STRING"  # JSON string containing all DEEP CLONE metadata
+    - name: "source_table_properties"
+      type: "STRING"  # JSON string containing source table properties
+    - name: "target_table_properties"
+      type: "STRING"  # JSON string containing target table properties
+    - name: "partition_info"
+      type: "STRING"  # JSON string containing partition information
+    - name: "file_count"
+      type: "BIGINT"
+    - name: "total_size_bytes"
+      type: "BIGINT"
+    - name: "last_modified"
+      type: "TIMESTAMP"
+
+# Catalogs to backup
+catalogs:
+  main_catalog:
+    priority: 1
+    schemas:
+      sales:
+        priority: 1
+        tables:
+          orders:
+            priority: 1
+            backup_frequency: "daily"
+            retention_days: 30
+            verification:
+              enabled: true
+              row_count_check: true
+              data_sample_check: true
+              sample_size: 1000
+          customers:
+            priority: 2
+            backup_frequency: "daily"
+            retention_days: 30
+            verification:
+              enabled: true
+              row_count_check: true
+              data_sample_check: true
+              sample_size: 1000
+      inventory:
+        priority: 2
+        tables:
+          products:
+            priority: 1
+            backup_frequency: "daily"
+            retention_days: 30
+            verification:
+              enabled: true
+              row_count_check: true
+              data_sample_check: true
+              sample_size: 1000

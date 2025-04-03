@@ -6,7 +6,7 @@ from pyspark.sql import SparkSession
 from src.utils.spark_utils import get_spark_session, read_data, write_data
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")  # type: ignore[misc]
 def spark() -> SparkSession:
     """Create a Spark session for testing."""
     return (
